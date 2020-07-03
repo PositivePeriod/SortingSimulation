@@ -34,6 +34,7 @@ class WindowClass(QMainWindow, form_class):
         self.three_heatmap.stateChanged.connect(lambda: self.option_function('heatmap'))
         self.point_btn.clicked.connect(lambda: self.option_function('btn'))
         self.line_btn.clicked.connect(lambda: self.option_function('btn'))
+        self.bar_btn.clicked.connect(lambda: self.option_function('btn'))
 
         # Sort Radiobutton binding
         self.algorithm = ('bogo', 'bubble', 'gnome', 'heap', 'insertion', 'merge', 'quick', 'selection', 'shell')
@@ -46,7 +47,6 @@ class WindowClass(QMainWindow, form_class):
         self.history = []
         self.heatmap = True
         self.sorting = Sort()
-        self.key = {}
         self.rate = 10
 
         # Timer
@@ -54,7 +54,10 @@ class WindowClass(QMainWindow, form_class):
         self.timer.setInterval(self.rate)  # default
 
         # Drawing; canvas
-        self.curve = None
+        self.key = 'line'
+        self.line_drawing = pyqtgraph.PlotCurveItem()
+        self.point_drawing = pyqtgraph.ScatterPlotItem()
+        self.bar_drawing = pyqtgraph.BarGraphItem()
 
         # Initial state
         self.array_size = 10  # default
@@ -123,8 +126,6 @@ class WindowClass(QMainWindow, form_class):
         self.canvas_widget.setXRange(0, self.array_size)
         self.canvas_widget.setYRange(0, self.array_size)
         self.draw_scene(self_data=True)
-        if self.key != {}:
-            self.key['symbolSize'] = self.point_size()
 
     def update_text(self, array_edit, turn_init, time_init, time_only=False):
         if time_only:
@@ -145,14 +146,28 @@ class WindowClass(QMainWindow, form_class):
             self.time_data[1] = time.time()
             self.time.setText(f'Time : {round(self.time_data[1] - self.time_data[0], 5)}s')
 
+    def draw_graph(self, data):
+        self.canvas_widget.clear()
+        if self.key == 'line':
+            key = {'y': numpy.array(data)}
+            self.line_drawing.setData(**key)
+            self.canvas_widget.addItem(self.line_drawing)
+        elif self.key == 'point':
+            key = {'pen': None, 'symbol': 'o', 'symbolPen': None, 'symbolBrush': pyqtgraph.mkBrush('w'),
+                   'size': self.point_size(data), 'x': numpy.arange(len(data)), 'y': numpy.array(data)}  # TODO static -> initial
+            self.point_drawing.setData(**key)
+            self.canvas_widget.addItem(self.point_drawing)
+        elif self.key == 'bar':
+            key = {'x': numpy.arange(len(data)), 'height': numpy.array(data), 'width': 1, 'brush': 'w', 'pen': pyqtgraph.mkPen('w')}
+            self.bar_drawing.setOpts(**key)
+            self.canvas_widget.addItem(self.bar_drawing)
+
     def draw_scene(self, self_data=False):
         if self_data:
-            self.canvas_widget.clear()
-            self.curve = self.canvas_widget.getPlotItem().plot(**self.key)
-            self.curve.setData(self.data)
+            self.draw_graph(self.data)
             return
         ans = self.sorting.get_data()
-        if ans is None:
+        if ans is None:  # TODO control only data that changes or highlight
             self.update_text(False, False, False, time_only=True)
             return
         elif ans == 'finish':
@@ -160,10 +175,8 @@ class WindowClass(QMainWindow, form_class):
             if self.heatmap and len(self.history) > 0:
                 self.heatmap_function()
         else:
-            self.update_text(array_edit=False, turn_init=False, time_init=False)
-            self.canvas_widget.clear()
-            self.curve = self.canvas_widget.getPlotItem().plot(**self.key)
-            self.curve.setData(ans)
+            self.update_text(array_edit=False, turn_init=False, time_init=False)  # TODO deepcopy
+            self.draw_graph(ans)
             self.data = list(ans)
             if self.heatmap:
                 self.history.append(ans)
@@ -183,22 +196,26 @@ class WindowClass(QMainWindow, form_class):
                 self.heatmap = False
         elif command == 'btn':
             if self.line_btn.isChecked():
-                self.key = {}
+                self.key = 'line'
                 self.draw_scene(self_data=True)
             elif self.point_btn.isChecked():
-                self.key = {'pen': None, 'symbol': 'o', 'symbolPen': None, 'symbolBrush': pyqtgraph.mkBrush(color=(0, 128, 0)), 'symbolSize': self.point_size()}
+                self.key = 'point'
+                self.draw_scene(self_data=True)
+            elif self.bar_btn.isChecked():
+                self.key = 'bar'
                 self.draw_scene(self_data=True)
 
-    def point_size(self):
-        if len(self.data) > 600:
+    def point_size(self, data):
+        p = len(data)
+        if p > 600:
             return 3
-        elif len(self.data) > 400:
+        elif p > 400:
             return 5
-        elif len(self.data) > 200:
+        elif p > 200:
             return 7
-        elif len(self.data) > 100:
+        elif p > 100:
             return 9
-        elif len(self.data) > 50:
+        elif p > 50:
             return 11
         else:
             return 14

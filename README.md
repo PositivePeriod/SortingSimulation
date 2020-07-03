@@ -37,6 +37,6 @@ Korea Science Academy of KAIST Data Structure Homework 2020-1
 - https://wikidocs.net/book/2165
 
 ## 5. Others
-If you have any idea or comment for our project, please contact us!
+If you have any idea or comment, please contact me!
 
 Have a nice coding!
