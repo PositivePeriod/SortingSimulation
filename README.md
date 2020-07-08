@@ -13,7 +13,7 @@ Python simulation based on PyQt5, PyQtGraph and Matplotlib
 
 Korea Science Academy of KAIST Data Structure Homework 2020-1
 
-* Jeuk Hwang : jeukhwang@gmail.com / https://github.com/PositivePeriod
+* Jeuk Hwang : positiveperiod.dev@gmail.com / https://github.com/PositivePeriod
 
 ## 3. Future Plan
 
