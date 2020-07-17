@@ -1,12 +1,11 @@
 import random
+import time
 from collections import deque
 import threading
 
 
-# TODO comb sort
-
-
 class Sort:
+    # TODO comb sort / radix sort
     def __init__(self):
         self.queue = deque()  # appendleft, pop
         self.data_lock = threading.Lock()
@@ -27,21 +26,25 @@ class Sort:
             if len(self.queue) > 0:
                 return self.queue.pop()
             else:
-                return None
+                return None, None, None
 
-    def put_data(self, finish=False):
+    def put_data(self, finish=False, change=None, highlight=None, data=None):
         with self.run_lock:
             if not self.run:
                 return 'close'
         with self.data_lock:
             if finish:
+                # check
+                for i in range(len(self.data)):
+                    self.queue.appendleft((None, [(i, 'g')], None))
+                self.queue.appendleft((None, None, 'stay'))
                 self.queue.appendleft('finish')
             else:
-                self.queue.appendleft(tuple(self.data))
+                self.queue.appendleft((change, highlight, data))
             return True
 
     def sort(self, array):
-        print(f'sort.py; sort; algorithm : {self.algorithm}')
+        print(f'sort_exp.py; sort; algorithm : {self.algorithm}')
         self.data = array.copy()
         self.run = True
         thr = threading.Thread(target=getattr(self, self.algorithm + '_sort'))
@@ -51,11 +54,15 @@ class Sort:
     def bubble_sort(self):
         for i in range(len(self.data) - 1):
             for j in range(len(self.data) - i - 1):
+                opt = {'highlight': [(len(self.data) - i, 'b')]}
+                if i == 0:
+                    opt['highlight'] = []
                 if self.data[j] > self.data[j + 1]:
                     self.data[j], self.data[j + 1] = self.data[j + 1], self.data[j]
-                    if self.put_data() == 'close':
-                        return 'close'
-
+                    opt['change'] = [(j, j + 1)]
+                opt['highlight'].append((j+1, 'r'))
+                if self.put_data(**opt) == 'close':
+                    return 'close'
         self.put_data(finish=True)
 
     def quick_sort(self):
@@ -71,15 +78,18 @@ class Sort:
             a, b, c = self.data[low], self.data[(low + high) // 2], self.data[high]
             pivot = a + b + c - min(a, b, c) - max(a, b, c)  # changeable
             while low <= high:
+                opt = {'highlight': [(pivot-1, 'b')]}
                 while self.data[low] < pivot:
                     low += 1
                 while self.data[high] > pivot:
                     high -= 1
+                opt['highlight'].extend([(low, 'r'), (high, 'r')])
                 if low <= high:
                     self.data[low], self.data[high] = self.data[high], self.data[low]
+                    opt['change'] = [(low, high)]
                     low, high = low + 1, high - 1
-                    if self.put_data() == 'close':
-                        return 'close'
+                if self.put_data(**opt) == 'close':
+                    return 'close'
             return low
 
         if sort(0, len(self.data) - 1) == 'close':
@@ -95,8 +105,9 @@ class Sort:
                 if self.data[left] <= self.data[head]:
                     break
                 self.data[head], self.data[left] = self.data[left], self.data[head]
+                opt_ = {'change': [(head, left)], 'highlight': [(head, 'b'), (left, 'b')]}
                 head, left = left, left * 2 + 1
-                if self.put_data() == 'close':
+                if self.put_data(**opt_) == 'close':
                     return 'close'
 
         for i in range(len(self.data) // 2 - 1, -1, -1):
@@ -104,7 +115,8 @@ class Sort:
                 return 'close'
         for i in range(len(self.data) - 1, 0, -1):
             self.data[i], self.data[0] = self.data[0], self.data[i]
-            if self.put_data() == 'close':
+            opt = {'change': [(i, 0)], 'highlight': [(i, 'r'), (0, 'b')]}
+            if self.put_data(**opt) == 'close':
                 return 'close'
             if heapify(0, i) == 'close':
                 return 'close'
@@ -113,65 +125,81 @@ class Sort:
     def insertion_sort(self):
         for i in range(1, len(self.data)):
             for j in range(i, 0, -1):
+                opt = {'highlight': [(i, 'b')]}
                 if self.data[j] < self.data[j - 1]:
                     self.data[j], self.data[j - 1] = self.data[j - 1], self.data[j]
-                    if self.put_data() == 'close':
+                    opt['change'] = [(j, j-1)]
+                    opt['highlight'].extend([(j, 'r'), (j-1, 'r')])
+                    if self.put_data(**opt) == 'close':
                         return 'close'
                 else:
                     break
         self.put_data(finish=True)
 
-    def merge_sort(self):  # TODO showing; in-place have problem
-        def sort(arr):
-            if len(arr) < 2:
+    def merge_sort(self):  # not in-place
+        def sort(arr, start, end):
+            if end-start < 2:
                 return
-            middle = len(arr) // 2
-            arr_1 = arr[0:middle]
-            arr_2 = arr[middle:len(arr)]
-            sort(arr_1)
-            sort(arr_2)
-            if merge(arr_1, arr_2, arr) == 'close':
+            middle = (start+end) // 2
+            sort(arr, start, middle)
+            sort(arr, middle, end)
+            if merge(arr, start, middle, end) == 'close':
                 return 'close'
 
-        def merge(arr_1, arr_2, arr):
+        def merge(arr, start, middle, end):
             i, j = 0, 0
-            while i + j < len(arr):
-                if j == len(arr_2) or (i < len(arr_1) and arr_1[i] < arr_2[j]):
-                    arr[i + j] = arr_1[i]
+            arr_1 = arr[start: middle]
+            arr_2 = arr[middle: end]
+            while i + j < (end-start):
+                if j == (end-middle) or (i < (middle-start) and arr_1[i] < arr_2[j]):
+                    arr[start + i + j] = arr_1[i]
+                    opt = {'highlight': [(start + i + j, 'r')], 'data': arr.copy()}
                     i += 1
                 else:
-                    arr[i + j] = arr_2[j]
+                    arr[start + i + j] = arr_2[j]
+                    opt = {'highlight': [(start + i + j, 'r')], 'data': arr.copy()}
                     j += 1
-                if self.put_data() == 'close':
+                opt['highlight'].append((end-1, 'b'))
+                if self.put_data(**opt) == 'close':
                     return 'close'
 
-        if sort(self.data) == 'close':
+        if sort(self.data, 0, len(self.data)) == 'close':
             return 'close'
         self.put_data(finish=True)
 
     def gnome_sort(self):
         pos = 0
+        max_ = 0
         while pos < len(self.data):
+            opt = {'highlight': [(pos, 'r')]}
             if pos == 0 or self.data[pos] >= self.data[pos - 1]:
                 pos += 1
+                max_ = min(max(max_, pos), len(self.data)-1)
             else:
                 self.data[pos], self.data[pos - 1] = self.data[pos - 1], self.data[pos]
-                if self.put_data() == 'close':
-                    return 'close'
+                opt = {'change': [(pos, pos-1)], 'highlight': [(pos-1, 'r')]}
                 pos -= 1
+            opt['highlight'].append((max_, 'b'))
+            if self.put_data(**opt) == 'close':
+                return 'close'
         self.put_data(finish=True)
 
     def bogo_sort(self):
         while True:
+            time.sleep(0.05)  # data is stuck in queue
             flag = True
             for i in range(len(self.data) - 1):
-                if self.data[i] > self.data[i + 1]:
+                opt = {'highlight': [(i, 'r'), (i+1, 'r')]}
+                if self.put_data(**opt) == 'close':
+                    return 'close'
+                if not self.data[i] < self.data[i + 1]:
                     flag = False
                     break
             if flag:
                 break
             random.shuffle(self.data)
-            if self.put_data() == 'close':
+            opt = {'data': self.data.copy()}
+            if self.put_data(**opt) == 'close':
                 return 'close'
         self.put_data(finish=True)
 
@@ -181,9 +209,13 @@ class Sort:
             for j in range(i + 1, len(self.data)):
                 if self.data[j] < self.data[min_id]:
                     min_id = j
+                opt = {'highlight': [(i, 'b'), (min_id, 'b'), (j, 'r')]}
+                if self.put_data(**opt) == 'close':
+                    return 'close'
             if min_id != i:
                 self.data[i], self.data[min_id] = self.data[min_id], self.data[i]
-                if self.put_data() == 'close':
+                opt = {'highlight': [(i, 'b'), (min_id, 'b')], 'change': [(i, min_id)]}
+                if self.put_data(**opt) == 'close':
                     return 'close'
         self.put_data(finish=True)
 
@@ -194,11 +226,13 @@ class Sort:
         gap = gap // 3
         while gap > 0:
             for i in range(gap):
-                for j in range(i + gap, len(self.data), gap):
+                for j in range(i, len(self.data), gap):
                     for k in range(j, gap-1, -gap):
+                        opt = {'highlight': [(k, 'r')]}
                         if self.data[k] < self.data[k - gap]:
                             self.data[k], self.data[k - gap] = self.data[k - gap], self.data[k]
-                            if self.put_data() == 'close':
+                            opt['change'] = [(k, k-gap)]
+                            if self.put_data(**opt) == 'close':
                                 return 'close'
                         else:
                             break

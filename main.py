@@ -1,16 +1,17 @@
+import csv
+import os
 import sys
 import time
 import pyqtgraph
 from PyQt5 import uic, QtCore
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog
 import random
-from sort import Sort
+from sort import Sort  # TODO
 import numpy
 import matplotlib.pyplot as plt
 import copy
 
-# TODO user input by csv
-# TODO mutiple windows -> compare algorithm - more threading?
+# TODO multiple windows -> compare algorithm - more threading?
 
 form_class = uic.loadUiType('pyqt_gui.ui')[0]
 
@@ -24,6 +25,8 @@ class WindowClass(QMainWindow, form_class):
         self.shuffle.clicked.connect(self.shuffle_function)
         self.start.clicked.connect(self.start_function)
         self.stop.clicked.connect(self.stop_function)
+        self.makeuser.clicked.connect(lambda: self.userinput_function('make'))
+        self.searchuser.clicked.connect(lambda: self.userinput_function('search'))
 
         # Slider binding
         self.slider_speed.valueChanged.connect(self.speed_function)
@@ -43,11 +46,11 @@ class WindowClass(QMainWindow, form_class):
 
         self.counter = 0
         self.time_data = [0, 0]  # start, finish
-        self.data = [i + 1 for i in range(10)]
+        self.data = [i+1 for i in range(10)]
         self.history = []
         self.heatmap = True
         self.sorting = Sort()
-        self.rate = 10
+        self.rate = 50
 
         # Timer
         self.timer = QtCore.QTimer()
@@ -58,6 +61,12 @@ class WindowClass(QMainWindow, form_class):
         self.line_drawing = pyqtgraph.PlotCurveItem()
         self.point_drawing = pyqtgraph.ScatterPlotItem()
         self.bar_drawing = pyqtgraph.BarGraphItem()
+        self.highlight_drawing = [pyqtgraph.BarGraphItem() for _ in range(3)]  # r g b
+        self.point_drawing.setData(pen=None, symbol='o', symbolPen=None, symbolBrush='w')
+        self.bar_drawing.setOpts(width=1, brush='w', pen='w')
+        self.highlight_drawing[0].setOpts(width=1, brush='r', pen='r')
+        self.highlight_drawing[1].setOpts(width=1, brush='g', pen='g')
+        self.highlight_drawing[2].setOpts(width=1, brush='b', pen='b')
 
         # Initial state
         self.array_size = 10  # default
@@ -94,8 +103,11 @@ class WindowClass(QMainWindow, form_class):
         self.option_group.setEnabled(False)
         self.start.setEnabled(False)
         self.shuffle.setEnabled(False)
+        self.makeuser.setEnabled(False)
+        self.searchuser.setEnabled(False)
 
         self.update_text(array_edit=False, turn_init=True, time_init=True)
+        print('start_function', self.data)
         self.drawing_function()
 
     def stop_function(self):
@@ -110,6 +122,8 @@ class WindowClass(QMainWindow, form_class):
         self.option_group.setEnabled(True)
         self.start.setEnabled(True)
         self.shuffle.setEnabled(True)
+        self.makeuser.setEnabled(True)
+        self.searchuser.setEnabled(True)
 
     def speed_function(self):
         self.rate = self.slider_speed.value()
@@ -121,11 +135,57 @@ class WindowClass(QMainWindow, form_class):
         self.update_text(array_edit=True, turn_init=True, time_init=True)
 
         # visual
-        self.data = [i + 1 for i in range(self.array_size)]
+        self.data = [i+1 for i in range(self.array_size)]
         random.shuffle(self.data)
         self.canvas_widget.setXRange(0, self.array_size)
         self.canvas_widget.setYRange(0, self.array_size)
         self.draw_scene(self_data=True)
+
+    def userinput_function(self, command):
+        if command == 'make':
+            path = './data'
+            if not os.path.isdir(path):
+                os.mkdir(path)
+            counter = 1
+            while os.path.isfile(path+f'/user_input_format{counter}.csv'):
+                counter += 1
+            with open(path+f'/user_input_format{counter}.csv', 'w', encoding='utf-8', newline='') as f:
+                wr = csv.writer(f)
+                wr.writerow(['Order', "Data"])
+                size = 10
+                for i in range(size):
+                    wr.writerow([i+1, size-i])  # TODO
+        elif command == 'search':
+            path, extension = QFileDialog.getOpenFileName(self, caption='Open File', directory='./data', filter='CSV Files(*.csv)')
+            if path is None:
+                return 0
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    rdr = csv.reader(f)
+                    data = []
+                    for line in rdr:
+                        data.append(line[1])
+                    data.pop(0)
+                    if not len(data) > 0:
+                        raise Exception
+                    else:
+                        data = [int(x) for x in data]
+            except Exception as e:  # TODO - specific
+                print(e)
+                # TODO - add user alert
+                return 0
+
+            # update by slider_size value
+            self.data = data
+            self.array_size = len(self.data)
+            self.slider_size.setValue(min(self.array_size, self.slider_size.maximum()))
+            self.array.setText(f'Size : {self.array_size}')
+            self.update_text(array_edit=False, turn_init=True, time_init=True)
+
+            # visual
+            self.canvas_widget.setXRange(0, self.array_size)
+            self.canvas_widget.setYRange(0, self.array_size)
+            self.draw_scene(self_data=True)
 
     def update_text(self, array_edit, turn_init, time_init, time_only=False):
         if time_only:
@@ -147,19 +207,20 @@ class WindowClass(QMainWindow, form_class):
             self.time.setText(f'Time : {round(self.time_data[1] - self.time_data[0], 5)}s')
 
     def draw_graph(self, data):
-        self.canvas_widget.clear()
         if self.key == 'line':
             key = {'y': numpy.array(data)}
             self.line_drawing.setData(**key)
+            self.canvas_widget.clear()
             self.canvas_widget.addItem(self.line_drawing)
         elif self.key == 'point':
-            key = {'pen': None, 'symbol': 'o', 'symbolPen': None, 'symbolBrush': pyqtgraph.mkBrush('w'),
-                   'size': self.point_size(data), 'x': numpy.arange(len(data)), 'y': numpy.array(data)}  # TODO static -> initial
+            key = {'size': self.point_size(data), 'x': numpy.arange(len(data)), 'y': numpy.array(data)}
             self.point_drawing.setData(**key)
+            self.canvas_widget.clear()
             self.canvas_widget.addItem(self.point_drawing)
         elif self.key == 'bar':
-            key = {'x': numpy.arange(len(data)), 'height': numpy.array(data), 'width': 1, 'brush': 'w', 'pen': pyqtgraph.mkPen('w')}
+            key = {'x': numpy.arange(len(data))+0.5, 'height': numpy.array(data)}
             self.bar_drawing.setOpts(**key)
+            self.canvas_widget.clear()
             self.canvas_widget.addItem(self.bar_drawing)
 
     def draw_scene(self, self_data=False):
@@ -167,7 +228,7 @@ class WindowClass(QMainWindow, form_class):
             self.draw_graph(self.data)
             return
         ans = self.sorting.get_data()
-        if ans is None:  # TODO control only data that changes or highlight
+        if ans == (None, None, None):
             self.update_text(False, False, False, time_only=True)
             return
         elif ans == 'finish':
@@ -175,11 +236,31 @@ class WindowClass(QMainWindow, form_class):
             if self.heatmap and len(self.history) > 0:
                 self.heatmap_function()
         else:
-            self.update_text(array_edit=False, turn_init=False, time_init=False)  # TODO deepcopy
-            self.draw_graph(ans)
-            self.data = list(ans)
-            if self.heatmap:
-                self.history.append(ans)
+            self.update_text(array_edit=False, turn_init=False, time_init=False)
+            self.sorting_command(ans)
+
+    def sorting_command(self, commands):
+        change, highlight, data = commands
+        if data is not None:
+            if data != 'stay':
+                self.data = data
+            self.draw_graph(self.data)
+        elif change is not None:  # elif!
+            for i, j in change:
+                self.data[i], self.data[j] = self.data[j], self.data[i]
+            self.draw_graph(self.data)
+        if self.key == 'bar' and highlight is not None:
+            color = [[], [], []]  # r g b
+            for x_, color_ in highlight:
+                color['rgb'.index(color_)].append(x_)
+            # print(color)
+            for i in [1, 2, 0]:  # r g b draw order
+                key = {'x': numpy.array(color[i])+0.5, 'height': numpy.array([self.data[x] for x in color[i]])}
+                self.highlight_drawing[i].setOpts(**key)
+                self.canvas_widget.addItem(self.highlight_drawing[i])
+            # print('processing...')
+        if self.heatmap and ((data is not None and data != 'stay') or change is not None):
+            self.history.append(tuple(self.data))
 
     def drawing_function(self):
         self.sorting.sort(self.data)

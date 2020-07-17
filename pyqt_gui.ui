@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>809</width>
-    <height>491</height>
+    <width>842</width>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,47 +26,82 @@
      </widget>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout_9" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0">
+     <layout class="QGridLayout" name="gridLayout_9" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0">
       <property name="sizeConstraint">
        <enum>QLayout::SetMinAndMaxSize</enum>
       </property>
       <property name="horizontalSpacing">
        <number>7</number>
       </property>
-      <item row="7" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item row="2" column="0">
+       <widget class="QGroupBox" name="option_group">
+        <property name="title">
+         <string>Drawing</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_13">
+         <item>
+          <widget class="QWidget" name="widget_2" native="true">
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="line_btn">
+              <property name="text">
+               <string>Line</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QRadioButton" name="point_btn">
+              <property name="text">
+               <string>Point</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="two_heatmap">
+              <property name="text">
+               <string>2D heatmap</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="bar_btn">
+              <property name="text">
+               <string>Bar</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="three_heatmap">
+              <property name="text">
+               <string>3D heatmap</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="speed">
-          <property name="minimumSize">
-           <size>
-            <width>120</width>
-            <height>0</height>
-           </size>
-          </property>
+         <widget class="QLabel" name="turn">
           <property name="text">
-           <string>Speed : 10ms</string>
+           <string>Turn :</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="slider_speed">
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>500</number>
-          </property>
-          <property name="singleStep">
-           <number>1</number>
-          </property>
-          <property name="pageStep">
-           <number>10</number>
-          </property>
-          <property name="value">
-           <number>10</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QLabel" name="time">
+          <property name="text">
+           <string>Time :</string>
           </property>
          </widget>
         </item>
@@ -111,51 +146,58 @@
         </item>
        </layout>
       </item>
-      <item row="13" column="0">
-       <widget class="QLabel" name="jeuk">
-        <property name="text">
-         <string>2020-1 DS 19-124 Jeuk Hwang</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <item row="8" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <widget class="QPushButton" name="shuffle">
+         <widget class="QPushButton" name="makeuser">
           <property name="text">
-           <string>Shuffle</string>
+           <string>Make User Data File</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="start">
+         <widget class="QPushButton" name="searchuser">
           <property name="text">
-           <string>Start</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="stop">
-          <property name="text">
-           <string>Stop</string>
+           <string>Search User Data</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
-      <item row="10" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+      <item row="7" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="turn">
+         <widget class="QLabel" name="speed">
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
-           <string>Turn :</string>
+           <string>Speed : 50ms</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="time">
-          <property name="text">
-           <string>Time :</string>
+         <widget class="QSlider" name="slider_speed">
+          <property name="minimum">
+           <number>10</number>
+          </property>
+          <property name="maximum">
+           <number>500</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+          <property name="pageStep">
+           <number>10</number>
+          </property>
+          <property name="value">
+           <number>50</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
@@ -248,61 +290,37 @@
         </layout>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QGroupBox" name="option_group">
-        <property name="title">
-         <string>Drawing</string>
+      <item row="14" column="0">
+       <widget class="QLabel" name="jeuk">
+        <property name="text">
+         <string>2020-1 DS 19-124 Jeuk Hwang</string>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_13">
-         <item>
-          <widget class="QWidget" name="widget_2" native="true">
-           <layout class="QGridLayout" name="gridLayout_7">
-            <item row="0" column="0">
-             <widget class="QRadioButton" name="line_btn">
-              <property name="text">
-               <string>Line</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QRadioButton" name="point_btn">
-              <property name="text">
-               <string>Point</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QCheckBox" name="two_heatmap">
-              <property name="text">
-               <string>2D heatmap</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QRadioButton" name="bar_btn">
-              <property name="text">
-               <string>Bar</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QCheckBox" name="three_heatmap">
-              <property name="text">
-               <string>3D heatmap</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
        </widget>
+      </item>
+      <item row="9" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QPushButton" name="shuffle">
+          <property name="text">
+           <string>Shuffle</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="start">
+          <property name="text">
+           <string>Start</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="stop">
+          <property name="text">
+           <string>Stop</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>

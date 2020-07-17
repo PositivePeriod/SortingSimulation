@@ -1,31 +1,27 @@
 Sorting Simulation
 ======
-Simulation of various sort algorithms
-------
 
-## 1. About
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Python simulation based on PyQt5, PyQtGraph and Matplotlib
+Simulation of various sort algorithms and visualization methods
 
-## 2. Contact
+## Requirements
 
-**Made by 19-124 Jeuk Hwang**
+- Python3 tested on 3.8.2
+- PyQt5 tested on 5.15.0
+- PyQtGraph tested on 0.11.0
+- numpy tested on 1.18.3
+- Matplotlib tested on 3.2.1
 
-Korea Science Academy of KAIST Data Structure Homework 2020-1
+## Future Plan
 
-* Jeuk Hwang : positiveperiod.dev@gmail.com / https://github.com/PositivePeriod
-
-## 3. Future Plan
-
-**These files will continue to update; might be unstable**
-
-- Highlight current active or accessed element
-- Reasonable time consuming; only control changed data not whole data
+- ~~Highlight current active or accessed element~~
+- ~~Reasonable time consuming; only control changed data not whole data~~
+- ~~User input by CSV~~
 - Make comb-sort and radix-sort
-- User input by CSV
-- Multiple windows to compare results from different algorithms
+- Multiple windows to compare results from different algorithms using threading
 
-## 4. Reference & Documentation
+## Relevant Documentation
 
 > English documentation
 
@@ -42,7 +38,6 @@ Korea Science Academy of KAIST Data Structure Homework 2020-1
 - https://opentutorials.org/module/544
 - [Datascienceschool](https://datascienceschool.net/view-notebook/d0b1637803754bb083b5722c9f2209d0/)
 
-## 5. Others
-If you have any idea or comment, please contact me!
+## License
 
-Have a nice coding!
+[MIT](https://opensource.org/licenses/MIT)
