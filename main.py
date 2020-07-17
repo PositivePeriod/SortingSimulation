@@ -2,16 +2,17 @@ import csv
 import os
 import sys
 import time
+import copy
+import random
+
+from sort import Sort
+
 import pyqtgraph
 from PyQt5 import uic, QtCore
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog
-import random
-from sort import Sort  # TODO
 import numpy
 import matplotlib.pyplot as plt
-import copy
 
-# TODO multiple windows -> compare algorithm - more threading?
 
 form_class = uic.loadUiType('pyqt_gui.ui')[0]
 
