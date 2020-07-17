@@ -5,6 +5,8 @@ Sorting Simulation
 
 Simulation of various sort algorithms and visualization methods
 
+https://www.youtube.com/watch?v=Y03rWErFeR4
+
 ## Requirements
 
 - Python3 tested on 3.8.2
